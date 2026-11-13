@@ -1,0 +1,30 @@
+{
+  "url": "https://www.baidu.com/",
+  "x": 100,
+  "y": 100,
+  "width": 800,
+  "height": 600,
+  "topmost": false,
+  "auto_hide": false,
+  "opacity": 1,
+  "history": [],
+  "favorites": [],
+  "folders": [],
+  "reader": {
+    "readerBg": "sepia",
+    "readerFlow": "page",
+    "readerSpeed": 5,
+    "readerFontPct": 140,
+    "readerLineHeight": 1.8,
+    "readerParaSpacing": 1,
+    "readerFontFamily": "\"Microsoft YaHei\", \"微软雅黑\", sans-serif"
+  },
+  "user": null,
+  "accounts": {},
+  "firstRun": 0,
+  "activity": [],
+  "sync_on": false,
+  "sync_last": 0,
+  "notes": [],
+  "activation": null
+}

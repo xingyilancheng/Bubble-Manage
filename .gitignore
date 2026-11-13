@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Intermediate build outputs (PyInstaller work dirs)
+dist_tools/
+build_ag/
+build_ce/
+build_tools/capture_engine/
+build_tools/激活码生成器*
+
+# Packaged app: keep distributable exes, exclude raw unpacked build + old versions
+dist_app/win-unpacked/
+dist_app/*-1.1.1.exe
+
+# Runtime user data (contains real personal data — never commit)
+app/settings.json
+legacy/.browser_profile/
+legacy/wv2/
+
+# Logs
+diag.log
+*.log
+
+# Cache
+__pycache__/
+*.pyc
+.qoder/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+# Activation system (sensitive)
+activation_generator.py
+activation_secret.key
+*.key
+dist_tools/激活码生成器.exe
+dist_tools/activation_secret.key

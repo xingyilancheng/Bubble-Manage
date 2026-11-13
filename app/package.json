@@ -1,0 +1,72 @@
+{
+  "name": "window-catcher-electron",
+  "productName": "冒泡管家",
+  "version": "1.1.2",
+  "description": "冒泡管家 (Electron UI + Python capture engine)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "epubjs": "^0.3.93",
+    "pdfjs-dist": "^3.11.174"
+  },
+  "build": {
+    "appId": "com.maopao.guanjia",
+    "productName": "冒泡管家",
+    "directories": {
+      "output": "../dist_app",
+      "buildResources": "buildres"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "styles.css",
+      "icon.png",
+      "icon.ico",
+      "cs_qr_code.png",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist_tools/capture_engine.exe",
+        "to": "capture_engine.exe"
+      }
+    ],
+    "asar": true,
+    "win": {
+      "icon": "buildres/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "冒泡管家-便携版-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "冒泡管家-安装包-${version}.exe"
+    }
+  }
+}

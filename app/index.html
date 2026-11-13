@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'unsafe-eval' blob:;
+                 style-src 'self' 'unsafe-inline' blob:;
+                 img-src 'self' data: blob:;
+                 font-src 'self' data: blob:;
+                 connect-src 'self' blob: data:;
+                 worker-src 'self' blob:;
+                 child-src 'self' blob:;
+                 frame-src 'self' blob: data:;
+                 media-src 'self' blob: data:;" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>冒泡管家</title>
+  <link rel="icon" type="image/png" href="icon.png" />
+</head>
+<body class="view-browser">
+  <div id="toolbar">
+    <button id="btn-home" class="tbtn icon" title="主页">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    </button>
+    <button id="btn-ebook" class="tbtn icon" title="电子书模式">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <div id="tabstrip">
+      <div id="tabs"></div>
+      <button id="tab-add" title="新建标签">+</button>
+      <button id="tab-overflow" class="hidden" title="全部标签">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+    <label class="switch" title="鼠标离开时自动隐藏">
+      <input type="checkbox" id="cb-hide" />
+      <span class="slider"></span>
+      <span class="switch-label">自动隐藏</span>
+    </label>
+    <button id="btn-top" class="tbtn icon" title="窗口置顶">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+    </button>
+    <button id="btn-zoom" class="tbtn icon" title="页面缩放">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+    </button>
+    <button id="btn-opacity" class="tbtn icon" title="主窗口透明度">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button id="btn-notes" class="tbtn icon" title="笔记">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+    </button>
+    <button id="btn-settings" class="tbtn icon" title="设置">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <div id="win-ctrls">
+      <button id="win-min" class="wbtn" title="最小化">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button id="win-close" class="wbtn close" title="关闭">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="addrbar">
+    <button class="navbtn" id="nav-back" title="后退">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <button class="navbtn" id="nav-fwd" title="前进">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <button class="navbtn" id="nav-reload" title="刷新">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
+    <button class="navbtn" id="nav-fav" title="收藏本页">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+    </button>
+    <input id="url" type="text" spellcheck="false" />
+    <button id="nav-go">转到</button>
+  </div>
+
+  <div id="main">
+    <div id="browser-area"></div>
+
+    <div id="home-view" class="view">
+      <div class="view-head">
+        <span class="view-title">主页</span>
+        <div class="view-spacer"></div>
+        <button class="vbtn" id="home-toggle-hist">历史记录</button>
+        <button class="vbtn" id="home-back">返回浏览器</button>
+      </div>
+      <div class="home-body" id="home-body"></div>
+    </div>
+
+    <div id="ebook-view" class="view">
+      <div class="view-head">
+        <span class="view-title">书架</span>
+        <input id="shelf-search" class="shelf-search" type="text" spellcheck="false" placeholder="搜索书名 / 作者 / 分类 / 书签…" />
+        <div id="shelf-filters" class="filters"></div>
+        <select id="shelf-sort" class="shelf-sort" title="排序方式">
+          <option value="added">按导入时间</option>
+          <option value="recent">按最近阅读</option>
+          <option value="progress">按阅读进度</option>
+        </select>
+        <div class="view-spacer"></div>
+        <button class="vbtn" id="shelf-bookmarks">书签</button>
+        <button class="vbtn" id="shelf-import">上传书籍</button>
+        <button class="vbtn" id="shelf-manage">整理书架</button>
+      </div>
+      <div id="shelf-scroll">
+        <div id="bm-results" class="bm-results hidden"></div>
+        <div id="shelf-grid" class="shelf-grid"></div>
+        <div id="shelf-empty" class="shelf-empty">书架空空如也，点击「上传书籍」导入 epub / pdf / txt 等常见格式。</div>
+      </div>
+    </div>
+
+    <div id="reader-view" class="view">
+      <div class="view-head reader-head">
+        <button class="vbtn" id="reader-back">‹ 书架</button>
+        <span class="view-title" id="reader-title"></span>
+        <div class="reader-tools">
+          <button class="vbtn" id="reader-toc" title="目录">目录</button>
+          <button class="vbtn" id="reader-bmarks" title="本书书签">书签</button>
+          <button class="vbtn" id="reader-auto" title="自动翻页 / 自动滚动">自动</button>
+          <button class="vbtn" id="reader-settings" title="阅读设置">设置</button>
+          <button class="vbtn" id="reader-font-down">A-</button>
+          <button class="vbtn" id="reader-font-up">A+</button>
+        </div>
+      </div>
+      <div id="reader-host"></div>
+      <div class="reader-foot">
+        <div id="reader-pager" class="pager">
+          <button class="vbtn" id="reader-prev">上一页</button>
+          <input id="reader-jump" class="rjump" type="number" min="1" step="1" placeholder="跳转" />
+          <button class="vbtn" id="reader-go">跳转</button>
+          <span id="reader-pos"></span>
+          <button class="vbtn" id="reader-next">下一页</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="notes-view" class="view">
+      <div class="view-head">
+        <span class="view-title">笔记</span>
+        <span class="nv-count" id="nv-count"></span>
+        <div class="view-spacer"></div>
+        <button class="vbtn" id="nv-add">新增笔记</button>
+        <button class="vbtn" id="nv-save">保存全部</button>
+        <button class="vbtn" id="nv-back">‹ 返回</button>
+      </div>
+      <div class="nv-scroll">
+        <div id="nv-list" class="nv-list"></div>
+        <div class="nv-empty" id="nv-empty">暂无笔记。在浏览器或电子书界面点击工具栏笔记图标即可记录。</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cap-panel">
+    <div id="cap-head">已捕获窗口:</div>
+    <div id="cap-list"></div>
+    <button id="btn-release-sel" class="hidden">释放选中</button>
+    <button id="btn-release-all">全部释放</button>
+  </div>
+
+  <div id="statusbar"><span id="status">就绪</span></div>
+
+  <div id="popup-opacity" class="popup hidden">
+    <span>窗口透明度</span>
+    <input type="range" id="op-range" min="30" max="100" value="100" />
+    <span id="op-val">100%</span>
+  </div>
+
+  <div id="popup-zoom" class="popup hidden">
+    <span>页面缩放（当前标签）</span>
+    <div class="zoom-row">
+      <button class="zbtn" id="zoom-out" title="缩小">−</button>
+      <input type="range" id="zoom-range" min="50" max="300" step="10" value="100" />
+      <button class="zbtn" id="zoom-in" title="放大">＋</button>
+    </div>
+    <div class="zoom-foot"><span id="zoom-val">100%</span><button id="zoom-reset">重置</button></div>
+    <div class="zoom-tip">也可用 Ctrl + ＋ / － / 0 缩放</div>
+  </div>
+
+  <div id="popup-settings" class="popup hidden">
+    <button id="set-login">登录</button>
+    <button id="set-activate">激活</button>
+    <button id="set-usage">使用查询</button>
+    <button id="set-pass">修改密码</button>
+    <button id="set-restart">重启内置浏览器</button>
+    <button id="set-release">释放全部捕获</button>
+    <button id="set-help">使用说明</button>
+    <button id="set-about">关于</button>
+  </div>
+
+  <div id="popup-notes" class="popup nt-box hidden">
+    <div class="nt-head">
+      <span class="nt-dot"></span>
+      <span class="nt-title">笔记</span>
+      <button class="mini nt-x" id="nt-x" title="关闭">×</button>
+    </div>
+    <div class="nt-body">
+      <div class="nt-ctx" id="nt-ctx"></div>
+      <textarea id="nt-input" class="nt-input" rows="3" placeholder="记录一条笔记…" spellcheck="false"></textarea>
+      <button class="nt-save" id="nt-save">保存笔记</button>
+      <div class="nt-list" id="nt-list"></div>
+      <button class="nt-open" id="nt-tab">打开笔记页</button>
+    </div>
+  </div>
+
+  <div id="popup-activate" class="popup ac-box hidden">
+    <div class="ac-head">
+      <span class="ac-dot"></span>
+      <span class="ac-title">软件激活</span>
+      <button class="mini ac-close" id="ac-close" title="关闭">×</button>
+    </div>
+    <div class="ac-body">
+      <div class="ac-row">
+        <span class="ac-lab">本机码</span>
+        <code class="ac-code" id="ac-machine">————</code>
+        <button class="mini" id="ac-copy">复制</button>
+      </div>
+      <div class="ac-status" id="ac-status">未激活</div>
+      <label class="fld">激活码<input id="ac-code-input" type="text" spellcheck="false" placeholder="请输入本机码绑定激活码" /></label>
+      <div class="ac-err" id="ac-err"></div>
+      <button class="ac-submit" id="ac-submit">激活</button>
+      <div class="ac-sep"></div>
+      <button class="ac-wx" id="ac-wx">微信账户激活</button>
+      <p class="ac-note">微信账户激活即将上线，敬请期待</p>
+      <div class="ac-sep"></div>
+      <div class="cs-box">
+        <div class="cs-qr" title="点击放大"><img src="cs_qr_code.png" alt="客服微信二维码" /></div>
+        <div class="cs-info">
+          <div class="cs-t">客服微信</div>
+          <div class="cs-id">ly_clqy</div>
+          <div class="cs-hint">点击二维码放大 · 或搜索微信号添加</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-close" class="popup cl-box hidden">
+    <div class="cl-head">
+      <span class="cl-title">关闭 冒泡管家</span>
+      <button class="mini cl-x" id="cl-x" title="关闭">×</button>
+    </div>
+    <div class="cl-body">
+      <p class="cl-msg">确定要关闭冒泡管家吗？</p>
+      <div class="cl-btns">
+        <button class="cl-btn" id="cl-cancel">取消</button>
+        <button class="cl-btn" id="cl-min">最小化</button>
+        <button class="cl-btn ok" id="cl-ok">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-usage" class="popup us-box hidden">
+    <div class="us-head">
+      <span class="us-dot"></span>
+      <span class="us-title">使用查询</span>
+      <button class="mini us-close" id="us-close" title="关闭">×</button>
+    </div>
+    <div class="us-body">
+      <div class="us-acct" id="us-acct">未登录</div>
+      <div class="us-cards">
+        <div class="us-card"><span class="us-k">本次打开</span><span class="us-v" id="us-open">—</span></div>
+        <div class="us-card"><span class="us-k">本次时长</span><span class="us-v" id="us-dur">—</span></div>
+        <div class="us-card"><span class="us-k">累计时长</span><span class="us-v" id="us-total">—</span></div>
+      </div>
+      <div class="us-dayrow">
+        <span class="us-daylabel">历史查询</span>
+        <select id="us-day"></select>
+      </div>
+      <div class="us-records">
+        <div class="us-sub">浏览记录</div>
+        <div class="us-hist" id="us-hist"></div>
+        <div class="us-sub">阅读记录</div>
+        <div class="us-hist" id="us-read"></div>
+        <div class="us-sub">绑定窗口记录</div>
+        <div class="us-hist" id="us-cap"></div>
+        <div class="us-sub">启动 / 关闭记录</div>
+        <div class="us-hist" id="us-session"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-pass" class="popup ps-box hidden">
+    <div class="ps-head">
+      <span class="ps-dot"></span>
+      <span class="ps-title">修改密码</span>
+      <button class="mini ps-close" id="ps-close" title="关闭">×</button>
+    </div>
+    <div class="ps-body">
+      <label class="fld">当前密码<input id="ps-old" type="password" placeholder="请输入当前密码" /></label>
+      <label class="fld">新密码<input id="ps-new" type="password" placeholder="至少 6 位" /></label>
+      <label class="fld">确认新密码<input id="ps-new2" type="password" placeholder="再次输入新密码" /></label>
+      <div class="ps-err" id="ps-err"></div>
+      <button class="ps-submit" id="ps-submit">确认修改</button>
+    </div>
+  </div>
+
+  <div id="popup-about" class="popup ab-box hidden">
+    <div class="ab-head">
+      <img class="ab-logo" src="icon.png" alt="冒泡管家" />
+      <div class="ab-id">
+        <div class="ab-name">冒泡管家</div>
+        <div class="ab-ver">版本 V1.1.2</div>
+      </div>
+      <button class="mini ab-close" id="ab-close" title="关闭">×</button>
+    </div>
+    <div class="ab-body">
+      <p class="ab-desc">窗口捕获与电子书阅读一体化工具。</p>
+      <div class="ab-up-tip" id="ab-up-tip"></div>
+      <button class="ab-update" id="ab-update">检查更新</button>
+      <div class="cs-box">
+        <div class="cs-qr" title="点击放大"><img src="cs_qr_code.png" alt="客服微信二维码" /></div>
+        <div class="cs-info">
+          <div class="cs-t">客服微信</div>
+          <div class="cs-id">ly_clqy</div>
+          <div class="cs-hint">点击二维码放大 · 或搜索微信号添加</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-qrzoom" class="qz-box hidden">
+    <img src="cs_qr_code.png" alt="客服微信二维码" />
+    <div class="qz-hint">用微信「扫一扫」识别二维码添加好友 · 点击任意处关闭</div>
+  </div>
+
+  <div id="popup-help" class="popup hp-box hidden">
+    <div class="hp-head">
+      <span class="hp-dot"></span>
+      <span class="hp-title">使用说明</span>
+      <button class="mini hp-close" id="hp-close" title="关闭">×</button>
+    </div>
+    <div class="hp-body">
+      <section>
+        <h4>登录与账号</h4>
+        <ul>
+          <li>首次使用请在设置「登录」中注册并登录本地账号；登录后可使用窗口捕获、阅读标注等功能。</li>
+          <li>试用期内可直接体验，正式使用请在设置「激活」中输入本机码对应的激活码。</li>
+          <li>设置「修改密码」可更改当前账号密码；账号信息仅保存在本机。</li>
+        </ul>
+      </section>
+      <section>
+        <h4>窗口捕获</h4>
+        <ul>
+          <li>登录后，用鼠标主动拖动其它程序窗口到应用上方即可绑定捕获。</li>
+          <li>被绑定的窗口会跟随主窗口一起移动。</li>
+          <li>鼠标移出应用区域时自动隐藏，移回时自动恢复。</li>
+          <li>在捕获面板或设置「释放全部捕获」可解绑窗口。</li>
+        </ul>
+      </section>
+      <section>
+        <h4>电子书阅读</h4>
+        <ul>
+          <li>书架支持导入 EPUB / PDF / TXT，可建文件夹分类、排序。</li>
+          <li>阅读界面可调节字体、行距、段距、背景色、翻页/滚动模式与自动阅读。</li>
+          <li>选中文字后弹出工具条：高亮（可选颜色）、划线（可选线型与颜色）、复制。</li>
+          <li>高亮与划线自动保存，并自动生成书签；点击已有标注可删除。</li>
+          <li>注意：PDF 为图像渲染，无可选文字层，暂不支持标注。</li>
+        </ul>
+      </section>
+      <section>
+        <h4>笔记与记录</h4>
+        <ul>
+          <li>笔记对话框可拖动；「打开笔记页」进入内置笔记编辑器。</li>
+          <li>设置「使用查询」可查看浏览、阅读、绑定、启动/关闭记录（整体最多预览 5 条，超出滚动）。</li>
+          <li>设置「修改密码」可更改当前账号密码。</li>
+        </ul>
+      </section>
+      <section>
+        <h4>快捷键</h4>
+        <ul>
+          <li>连按三次 S 键：最小化全部捕获窗口并聚焦默认标签、最小化应用。</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <div id="ann-bar" class="ann-pop hidden">
+    <div class="ann-row ann-actions">
+      <button id="ann-hl" class="ann-btn" title="高亮选中文字">高亮</button>
+      <button id="ann-ul" class="ann-btn" title="划线选中文字">划线</button>
+      <button id="ann-copy" class="ann-btn" title="复制选中文字">复制</button>
+    </div>
+    <div class="ann-row">
+      <span class="ann-lab">颜色</span>
+      <span class="ann-sw sel" data-c="#ffd54f" style="--c:#ffd54f" title="黄色"></span>
+      <span class="ann-sw" data-c="#a5d6a7" style="--c:#a5d6a7" title="绿色"></span>
+      <span class="ann-sw" data-c="#90caf9" style="--c:#90caf9" title="蓝色"></span>
+      <span class="ann-sw" data-c="#f8bbd0" style="--c:#f8bbd0" title="粉色"></span>
+      <span class="ann-sw" data-c="#ffcc80" style="--c:#ffcc80" title="橙色"></span>
+    </div>
+    <div class="ann-row">
+      <span class="ann-lab">线型</span>
+      <button class="ann-style active" data-s="solid" title="实线">─</button>
+      <button class="ann-style" data-s="dashed" title="虚线">┄</button>
+      <button class="ann-style" data-s="wavy" title="波浪线">﹏</button>
+    </div>
+  </div>
+
+  <div id="ann-del" class="ann-pop hidden">
+    <button id="ann-del-btn" title="删除标注">删除标注</button>
+  </div>
+
+  <div id="popup-login" class="popup lg-box hidden">
+    <div class="lg-head">
+      <span class="lg-dot"></span>
+      <span class="lg-title">登录 冒泡管家</span>
+      <button class="mini lg-close" id="lg-close" title="关闭">×</button>
+    </div>
+    <div class="lg-tabs">
+      <button class="lg-tab active" data-tab="pwd">密码登录</button>
+      <button class="lg-tab" data-tab="wx">微信登录</button>
+    </div>
+    <div class="lg-body">
+      <div class="lg-pane" data-pane="pwd">
+        <label class="fld">账号<input id="lg-user" type="text" spellcheck="false" placeholder="手机号 / 邮箱" /></label>
+        <label class="fld">密码<input id="lg-pass" type="password" spellcheck="false" placeholder="请输入密码（至少 6 位）" /></label>
+        <div class="lg-err" id="lg-err"></div>
+        <button class="lg-submit" id="lg-submit">登录</button>
+        <p class="lg-tip">首次登录将自动注册，之后同账号使用相同密码登录</p>
+      </div>
+      <div class="lg-pane hidden" data-pane="wx">
+        <div class="lg-qr"><span>微信二维码</span></div>
+        <p class="lg-hint">请使用微信扫描二维码登录</p>
+        <p class="lg-note">微信登录即将上线，敬请期待</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-book" class="popup hidden">
+    <label class="fld">书名<input id="bk-title" type="text" /></label>
+    <label class="fld">作者<input id="bk-author" type="text" /></label>
+    <label class="fld">分类<select id="bk-collection"></select></label>
+    <div class="row"><button id="bk-save">保存</button><button id="bk-cancel">取消</button></div>
+  </div>
+
+  <div id="tab-menu" class="tab-menu hidden"></div>
+
+  <div id="popup-preview" class="popup pv hidden">
+    <div class="pv-head">
+      <span id="pv-title"></span>
+      <button class="mini" id="pv-close">×</button>
+    </div>
+    <div id="pv-meta" class="pv-meta"></div>
+    <div id="pv-body" class="pv-body">
+      <div id="pv-list" class="pv-list"></div>
+    </div>
+    <div class="row"><button id="pv-read">开始阅读</button></div>
+  </div>
+
+  <div id="popup-bmarks" class="popup pv hidden">    <div class="pv-head">
+      <span>全部书签</span>
+      <button class="mini" id="bm-dlg-close">×</button>
+    </div>
+    <input id="bm-dlg-search" class="shelf-search" type="text" spellcheck="false" placeholder="搜索书签 / 书名…" />
+    <div class="pv-body"><div id="bm-dlg-list" class="pv-list"></div></div>
+  </div>
+
+  <div id="popup-prompt" class="popup prompt-box hidden">
+    <span id="pr-title">请输入</span>
+    <input id="pr-input" type="text" spellcheck="false" />
+    <div class="row"><button id="pr-ok">确定</button><button id="pr-cancel">取消</button></div>
+  </div>
+
+  <div id="popup-reader" class="popup rd-set hidden">
+    <div class="rd-head">
+      <span class="rd-dot"></span>
+      <span class="rd-title">阅读设置</span>
+      <button class="mini rd-close" id="rd-close" title="关闭">×</button>
+    </div>
+    <div class="rd-body">
+      <div class="rd-row">
+        <span class="rd-lab">背景</span>
+        <div class="rd-bgs">
+          <button class="rd-bg default" data-bg="default" title="默认"></button>
+          <button class="rd-bg sepia" data-bg="sepia" title="纸质"></button>
+          <button class="rd-bg green" data-bg="green" title="护眼"></button>
+          <button class="rd-bg dark" data-bg="dark" title="暗色"></button>
+        </div>
+      </div>
+      <div class="rd-row">
+        <span class="rd-lab">字体</span>
+        <select id="rd-face" class="rd-sel">
+          <option value="">默认</option>
+          <option value='SimSun, "宋体", serif'>宋体</option>
+          <option value='SimHei, "黑体", sans-serif'>黑体</option>
+          <option value='KaiTi, "楷体", STKaiti, serif'>楷体</option>
+          <option value='FangSong, "仿宋", STFangsong, serif'>仿宋</option>
+          <option value='"Microsoft YaHei", "微软雅黑", sans-serif'>雅黑</option>
+        </select>
+      </div>
+      <div class="rd-row">
+        <span class="rd-lab">行距</span>
+        <input id="rd-line" type="range" min="1.2" max="2.6" step="0.1" value="1.8" />
+        <span class="rd-val" id="rd-line-val">1.8</span>
+      </div>
+      <div class="rd-row">
+        <span class="rd-lab">段距</span>
+        <input id="rd-para" type="range" min="0" max="2" step="0.1" value="0.8" />
+        <span class="rd-val" id="rd-para-val">0.8</span>
+      </div>
+      <div class="rd-sep"></div>
+      <div class="rd-row">
+        <span class="rd-lab">翻页方式</span>
+        <button class="rd-opt" id="rd-flow-page">翻页</button>
+        <button class="rd-opt" id="rd-flow-scroll">滚动</button>
+      </div>
+      <div class="rd-row">
+        <span class="rd-lab">自动</span>
+        <button class="rd-opt" id="rd-auto-off">关闭</button>
+        <button class="rd-opt" id="rd-auto-page">自动翻页</button>
+        <button class="rd-opt" id="rd-auto-scroll">自动滚动</button>
+      </div>
+      <div class="rd-row">
+        <span class="rd-lab">速度</span>
+        <input id="rd-speed" type="range" min="1" max="10" step="1" value="5" />
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-rlist" class="popup pv hidden">
+    <div class="pv-head">
+      <span id="rl-title">目录</span>
+      <button class="mini" id="rl-close">×</button>
+    </div>
+    <div class="pv-body">
+      <div id="rl-list" class="pv-list"></div>
+    </div>
+    <div class="row" id="rl-foot"><button id="rl-add">＋ 添加当前页书签</button></div>
+  </div>
+
+  <script src="node_modules/pdfjs-dist/build/pdf.min.js"></script>
+  <script src="node_modules/jszip/dist/jszip.min.js"></script>
+  <script src="node_modules/epubjs/dist/epub.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
